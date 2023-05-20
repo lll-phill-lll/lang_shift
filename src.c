@@ -1,3 +1,5 @@
+#include "system.h"
+
 // ---------------------------------------------------------------------------
 //                               Работа с шифтом
 // ---------------------------------------------------------------------------
@@ -213,7 +215,7 @@ void shift_once_disable(void) {
 
 void shift_once_process(Key key, keyrecord_t* record) {
   bool down = record->event.pressed;
-  
+
   if (shift_once_disable_stage == 1) {
     shift_once_disable_stage = 0;
     shift_activate_from_user(false);
@@ -239,10 +241,36 @@ Lang lang_current = 0;
 uint32_t lang_timer = 0;
 uint8_t lang_pressed_count = 0;
 
+Key remap_for_mac_iso(Key key) {
+    switch (key) {
+        // numbers
+        case RU_S_JO: return RU_SLSH;
+        // 4->8
+        case RU_SCLN: return RU_ASTR;
+        // 5->4
+        case RU_PERC: return RU_SCLN;
+        // 6->5
+        case RU_COLN: return RU_PERC;
+        // 7-> буква после ю
+        case RU_QUES: return RU_COMM;
+        // 8->en*
+        case RU_ASTR: return EN_ASTR;
+
+        // letters
+        case RU_JO: return RU_BSLS;
+        case RU_SLSH: return RU_DOT;
+        case RU_DOT: return RU_QUES;
+        case RU_COMM: return RU_COLN;
+    }
+}
+
 Key lang_get_key(Key key) {
   if (EN_GRV <= key && key <= EN_QUES) {
     return (key - EN_GRV) + KS_GRV;
   } else if (RU_JO <= key && key <= RU_COMM) {
+    if (system_current == SYSTEM_MACOS) {
+        key = remap_for_mac_iso(key);
+    }
     return (key - RU_JO) + KS_GRV;
   } else {
     return NONE_KEY;
@@ -364,7 +392,7 @@ void lang_synchronize(void) {
       unregister_code(KC_LSHIFT);
       unregister_code(KC_LALT);
 
-      // Костыль, потому что при зажатом шифте если хочется нажать клавишу, которая переключает язык, то шифт слетает... 
+      // Костыль, потому что при зажатом шифте если хочется нажать клавишу, которая переключает язык, то шифт слетает...
       if (shift_current == 1) {
         register_code(KC_LSHIFT);
       }
@@ -375,7 +403,7 @@ void lang_synchronize(void) {
       unregister_code(KC_LALT);
       unregister_code(KC_LSHIFT);
 
-      // Костыль, потому что при зажатом шифте если хочется нажать клавишу, которая переключает язык, то шифт слетает... 
+      // Костыль, потому что при зажатом шифте если хочется нажать клавишу, которая переключает язык, то шифт слетает...
       if (shift_current == 1) {
         register_code(KC_LSHIFT);
       }
@@ -479,7 +507,7 @@ void lang_shift_press_key(Key key, bool down) {
       .time = timer_read(),
     },
   };
-  
+
   lang_shift_process_record(key, &record);
 }
 
@@ -515,7 +543,7 @@ bool lang_shift_process_custom_keycodes(Key key, keyrecord_t* record) {
       if (down) {
         if (lang_should_be == 0) {
           lang_activate_from_user(1);
-          layer_on(2);  
+          layer_on(2);
         } else {
           lang_activate_from_user(0);
           layer_off(2);
@@ -562,7 +590,7 @@ bool lang_shift_process_custom_keycodes(Key key, keyrecord_t* record) {
         lang_shift_tap_key(AG_DOT);
         lang_shift_tap_key(AG_DOT);
         lang_shift_tap_key(AG_DOT);
-      }    
+      }
       return false;
       break;
     case AG_CMSP:
