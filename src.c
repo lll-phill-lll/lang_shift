@@ -261,6 +261,8 @@ Key remap_for_mac_iso(Key key) {
         case RU_SLSH: return RU_DOT;
         case RU_DOT: return RU_QUES;
         case RU_COMM: return RU_COLN;
+
+        default: return NONE_KEY;
     }
 }
 
